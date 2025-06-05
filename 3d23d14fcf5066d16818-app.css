@@ -877,24 +877,24 @@
 
 @font-face {
   font-family: "Object Sans";
-  src: url(853127ec2169f864ca4a.otf) format("opentype");
+  src: url(/853127ec2169f864ca4a.otf) format("opentype");
 }
 
 @font-face {
   font-family: "Object Sans";
-  src: url(1003e3045605f939f7a8.otf) format("opentype");
+  src: url(/1003e3045605f939f7a8.otf) format("opentype");
   font-style: italic;
 }
 
 @font-face {
   font-family: "Object Sans";
-  src: url(d952856a9ba0368ae0e0.otf) format("opentype");
+  src: url(/d952856a9ba0368ae0e0.otf) format("opentype");
   font-weight: bold;
 }
 
 @font-face {
   font-family: "Object Sans";
-  src: url(f72adbc49d60f9dd1a62.otf) format("opentype");
+  src: url(/f72adbc49d60f9dd1a62.otf) format("opentype");
   font-weight: bold;
   font-style: italic;
 }
@@ -906,28 +906,28 @@
 
 @font-face {
   font-family: Plex;
-  src: url(6644595b6e0366dcdbb8.otf) format("opentype");
+  src: url(/6644595b6e0366dcdbb8.otf) format("opentype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: Plex;
-  src: url(15f7f974eecd1cd38df3.otf) format("opentype");
+  src: url(/15f7f974eecd1cd38df3.otf) format("opentype");
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
   font-family: Plex;
-  src: url(f085258296ac3b64b271.otf) format("opentype");
+  src: url(/f085258296ac3b64b271.otf) format("opentype");
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
   font-family: Plex;
-  src: url(d90fb192c8dbafa1d47b.otf) format("opentype");
+  src: url(/d90fb192c8dbafa1d47b.otf) format("opentype");
   font-weight: bold;
   font-style: italic;
 }
