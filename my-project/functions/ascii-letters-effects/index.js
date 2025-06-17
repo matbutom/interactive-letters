@@ -2,7 +2,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   let video;
   const canvasWidth = 1080;
   const canvasHeight = 1920;
-  const gridSize = 16;
+  const gridSize = 10;
   const asciiLetters = ['x', 's', 'm', 'o', 'u', 'k'];
   const asciiColors = [
     [124, 77, 255],   // x (violeta)
@@ -14,7 +14,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   ];
 
   // Umbral para "detectar" figuras: si el brillo es suficientemente distinto del fondo, se muestra la letra y color
-  const threshold = 50; // Puedes ajustar este valor para ser más o menos sensible
+  const threshold = 30; // Puedes ajustar este valor para ser más o menos sensible
 
   sketch.setup = () => {
     sketch.createCanvas(canvasWidth, canvasHeight);
@@ -22,7 +22,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     sketch.background(0);
     sketch.textAlign(sketch.CENTER, sketch.CENTER);
     sketch.textFont('monospace');
-    sketch.textSize(gridSize * 0.95);
+    sketch.textSize(gridSize * 0.6); // Ajusta el tamaño de letra para grids pequeños
 
     video = sketch.createCapture(sketch.VIDEO, () => {
       video.size(160, 90);
@@ -46,12 +46,13 @@ export const handler = ({ inputs, mechanic, sketch }) => {
         const camW = video.width;
         const camH = video.height;
         const scale = Math.max(canvasHeight / camW, canvasWidth / camH);
-        const cropW = canvasHeight / scale;
-        const cropH = canvasWidth / scale;
+        const cropW = canvasWidth / scale;    // Corregido: canvasWidth
+        const cropH = canvasHeight / scale;   // Corregido: canvasHeight
         const offsetX = (camW - cropW) / 2;
         const offsetY = (camH - cropH) / 2;
-        const videoX = offsetX + (cy / canvasHeight) * cropW;
-        const videoY = offsetY + (cx / canvasWidth) * cropH;
+        // Mapeo corregido: cx con canvasWidth, cy con canvasHeight
+        const videoX = offsetX + (cx / canvasWidth) * cropW;
+        const videoY = offsetY + (cy / canvasHeight) * cropH;
         const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
         const py = Math.floor(sketch.constrain(videoY, 0, camH - 1));
         const idx = (px + py * camW) * 4;
@@ -73,12 +74,13 @@ export const handler = ({ inputs, mechanic, sketch }) => {
           const camW = video.width;
           const camH = video.height;
           const scale = Math.max(canvasHeight / camW, canvasWidth / camH);
-          const cropW = canvasHeight / scale;
-          const cropH = canvasWidth / scale;
+          const cropW = canvasWidth / scale;    // Corregido: canvasWidth
+          const cropH = canvasHeight / scale;   // Corregido: canvasHeight
           const offsetX = (camW - cropW) / 2;
           const offsetY = (camH - cropH) / 2;
-          const videoX = offsetX + (cy / canvasHeight) * cropW;
-          const videoY = offsetY + (cx / canvasWidth) * cropH;
+          // Mapeo corregido: cx con canvasWidth, cy con canvasHeight
+          const videoX = offsetX + (cx / canvasWidth) * cropW;
+          const videoY = offsetY + (cy / canvasHeight) * cropH;
           const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
           const py = Math.floor(sketch.constrain(videoY, 0, camH - 1));
           const idx = (px + py * camW) * 4;
@@ -117,7 +119,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     // Indicador de modo
     sketch.noStroke();
     sketch.fill(255, 180);
-    sketch.textSize(36);
+    sketch.textSize(25);
     sketch.textAlign(sketch.RIGHT, sketch.BOTTOM);
     sketch.text(canvasWidth - 30, canvasHeight - 30);
   };

@@ -153,20 +153,19 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     const camW = video.width;
     const camH = video.height;
 
-    // Calcula la escala para crop-to-fill (rellenar el canvas completamente)
-    const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
+    // Calcula la escala para crop-to-fill (rellenar el canvas completamente, sin rotación)
+    const scale = Math.max(canvasWidth / camW, canvasHeight / camH);
 
     // Tamaño del video escalado
     const drawW = camW * scale;
     const drawH = camH * scale;
 
-    // Rota el canvas 90° horario, centra y aplica efecto espejo si quieres
+    // Centra el video en el canvas, sin rotar
     sketch.translate(canvasWidth / 2, canvasHeight / 2);
-    sketch.rotate(sketch.HALF_PI);
     sketch.scale(-1, 1); // efecto espejo, remueve si no lo quieres
 
-    // IMPORTANTE: por la rotación, drawW y drawH se invierten
-    sketch.image(video, 0, 0, drawH, drawW);
+    // Dibuja el video centrado, sin rotación
+    sketch.image(video, 0, 0, drawW, drawH);
 
     sketch.pop();
 

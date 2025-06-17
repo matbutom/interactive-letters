@@ -28,11 +28,6 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   sketch.draw = () => {
     sketch.background(0);
 
-    sketch.push();
-    // Rota el canvas 90° horario para vertical
-    sketch.translate(canvasWidth, 0);
-    sketch.rotate(sketch.HALF_PI);
-
     if (video && video.width > 0) {
       video.loadPixels();
 
@@ -40,13 +35,12 @@ export const handler = ({ inputs, mechanic, sketch }) => {
       const camW = video.width;
       const camH = video.height;
 
-      // Calcula la escala para crop to fill
-      // (Por rotación: camW llena canvasHeight, camH llena canvasWidth)
-      const scale = Math.max(canvasHeight / camW, canvasWidth / camH);
+      // Calcula la escala para crop to fill (sin rotación)
+      const scale = Math.max(canvasWidth / camW, canvasHeight / camH);
 
       // Tamaño del área del video que se usará para cubrir el canvas
-      const cropW = canvasHeight / scale;
-      const cropH = canvasWidth / scale;
+      const cropW = canvasWidth / scale;
+      const cropH = canvasHeight / scale;
 
       // Offset para centrar la imagen recortada
       const offsetX = (camW - cropW) / 2;
@@ -59,11 +53,11 @@ export const handler = ({ inputs, mechanic, sketch }) => {
           const cx = x + gridSize / 2;
           const cy = y + gridSize / 2;
 
-          // Mapear cx/cy al espacio del video recortado y rotado:
-          // cx (horizontal en canvas) → vertical en video (camH)
-          // cy (vertical en canvas) → horizontal en video (camW)
-          const videoX = offsetX + (cy / canvasHeight) * cropW;
-          const videoY = offsetY + (cx / canvasWidth) * cropH;
+          // Mapear cx/cy al espacio del video recortado (corregido: sin rotación)
+          // cx → horizontal en video (camW)
+          // cy → vertical en video (camH)
+          const videoX = offsetX + (cx / canvasWidth) * cropW;
+          const videoY = offsetY + (cy / canvasHeight) * cropH;
 
           // Redondea y limita para no salirte del video
           const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
@@ -90,17 +84,15 @@ export const handler = ({ inputs, mechanic, sketch }) => {
           if (letterImages[currentLetter]) {
             sketch.image(
               letterImages[currentLetter],
-              cy,
               cx,
+              cy,
               gridSize,
-              gridSize * (letterImages[currentLetter].height / letterImages[currentLetter].width)
+              gridSize // Ahora es cuadrado, igual que en el código anterior
             );
           }
         }
       }
     }
-
-    sketch.pop();
   };
 };
 
