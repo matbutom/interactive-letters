@@ -6,8 +6,8 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   const Body = Matter.Body;
   const Mouse = Matter.Mouse;
   const MouseConstraint = Matter.MouseConstraint;
-  
-  let initialLetterStates = []; 
+
+  let initialLetterStates = [];
   let imagenesLetras = {};
   let letrasCuerpos = [];
   let engine;
@@ -15,7 +15,6 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   let mConstraint;
   let video;
   const letraScale = 0.08;
-  // Canvas vertical fijo
   const canvasWidth = 1080;
   const canvasHeight = 1920;
 
@@ -40,22 +39,18 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     sketch.createCanvas(canvasWidth, canvasHeight);
     sketch.imageMode(sketch.CENTER);
 
-    // Captura video horizontal para asegurar buena calidad al recortar
-    video = sketch.createCapture(sketch.VIDEO, () => {
-      if (video) {
-        console.log("Dimensiones de la cámara:", video.width, video.height);
-      } else {
-        console.error("Error al iniciar la cámara.");
+    video = sketch.createCapture({
+      video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       }
+    }, () => {
+      video.hide();
     });
-    // Usa máxima resolución estándar
-    video.size(1280, 720);
-    video.hide();
 
     engine = Engine.create();
     world = engine.world;
 
-    // Handtrack
     const handtrack = require('handtrackjs');
     const modelParams = {
       flipHorizontal: false,
@@ -65,13 +60,9 @@ export const handler = ({ inputs, mechanic, sketch }) => {
       maxNumBoxes: 3,
     };
     handtrackModel = await handtrack.load(modelParams);
-    console.log("Modelo de Handtrack cargado");
     handtrack.startVideo(video.elt).then(function (status) {
-      console.log("Estado del video de Handtrack:", status);
       if (status) {
         runHandtrack();
-      } else {
-        console.log("Error al iniciar el video de Handtrack");
       }
     });
 
@@ -136,7 +127,8 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     handBodies = [];
 
     hands.forEach(hand => {
-      const reflectedX = canvasWidth - hand.bbox[0] - hand.bbox[2] / 2;
+      // Ya no reflejes: el video y el canvas están reflejados juntos
+      const reflectedX = hand.bbox[0] + hand.bbox[2] / 2;
       const y = hand.bbox[1] + hand.bbox[3] / 2;
       const radius = Math.max(hand.bbox[2], hand.bbox[3]) / 2;
       const handBody = Bodies.circle(reflectedX, y, radius, { isStatic: false, label: 'hand', frictionAir: 0.1 });
@@ -147,25 +139,20 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
   sketch.draw = () => {
     sketch.background(0);
-
-    // --- Dibuja el video vertical, crop to fill, centrado, sin deformar ---
+    // --- Fondo de video: crop-to-fill, rotado 90° IZQUIERDA y reflejado ---
     sketch.push();
     const camW = video.width;
     const camH = video.height;
 
-    // Calcula la escala para crop-to-fill (rellenar el canvas completamente, sin rotación)
-    const scale = Math.max(canvasWidth / camW, canvasHeight / camH);
+    // Calcula la escala para crop-to-fill tras rotar 90°
+    const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
+    const drawW = camH * scale;
+    const drawH = camW * scale;
 
-    // Tamaño del video escalado
-    const drawW = camW * scale;
-    const drawH = camH * scale;
-
-    // Centra el video en el canvas, sin rotar
     sketch.translate(canvasWidth / 2, canvasHeight / 2);
-    sketch.scale(-1, 1); // efecto espejo, remueve si no lo quieres
-
-    // Dibuja el video centrado, sin rotación
-    sketch.image(video, 0, 0, drawW, drawH);
+    sketch.rotate(sketch.HALF_PI); // 90° a la IZQUIERDA (antihorario)
+    sketch.scale(-1, 1); // reflejo horizontal, sobre el "nuevo" eje X (ya rotado)
+    sketch.image(video, 0, 0, 1920, 1080);
 
     sketch.pop();
 
@@ -215,7 +202,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
       sketch.ellipse(body.position.x, body.position.y, body.circleRadius * 2, body.circleRadius * 2);
     });
   };
-  
+
   function resetLetters() {
     letrasCuerpos.forEach((letraObj, index) => {
       Body.setPosition(letraObj.cuerpo, initialLetterStates[index].position);

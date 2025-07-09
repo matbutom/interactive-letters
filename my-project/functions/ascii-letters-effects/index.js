@@ -22,13 +22,28 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     sketch.background(0);
     sketch.textAlign(sketch.CENTER, sketch.CENTER);
     sketch.textFont('monospace');
-    sketch.textSize(gridSize * 0.6); // Ajusta el tamaño de letra para grids pequeños
+    sketch.textSize(gridSize * 0.6);
 
     video = sketch.createCapture(sketch.VIDEO, () => {
       video.size(160, 90);
       video.hide();
     });
   };
+
+  // FUNCION DE MAPEADO ROTADO Y CROP TO FILL - ROTACION 90° A LA IZQUIERDA
+  function mapCanvasToVideo(cx, cy, camW, camH) {
+  const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
+  const cropW = canvasHeight / scale;
+  const cropH = canvasWidth / scale;
+  const offsetX = (camW - cropW) / 2;
+  const offsetY = (camH - cropH) / 2;
+
+  // 90° izquierda
+  const videoX = offsetX + (cy / canvasHeight) * cropW;
+  const videoY = offsetY + ((canvasWidth - cx) / canvasWidth) * cropH;
+
+  return [videoX, videoY];
+}
 
   sketch.draw = () => {
     sketch.background(0);
@@ -45,14 +60,8 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
         const camW = video.width;
         const camH = video.height;
-        // CAMBIO: Forzar que el video ocupe el 100% del alto del canvas
-        const scale = canvasHeight / camH;
-        const cropW = canvasWidth / scale;
-        const cropH = canvasHeight / scale;
-        const offsetX = (camW - cropW) / 2;
-        const offsetY = (camH - cropH) / 2;
-        const videoX = offsetX + (cx / canvasWidth) * cropW;
-        const videoY = offsetY + (cy / canvasHeight) * cropH;
+
+        const [videoX, videoY] = mapCanvasToVideo(cx, cy, camW, camH);
         const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
         const py = Math.floor(sketch.constrain(videoY, 0, camH - 1));
         const idx = (px + py * camW) * 4;
@@ -73,14 +82,8 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
           const camW = video.width;
           const camH = video.height;
-          // CAMBIO: Forzar que el video ocupe el 100% del alto del canvas
-          const scale = canvasHeight / camH;
-          const cropW = canvasWidth / scale;
-          const cropH = canvasHeight / scale;
-          const offsetX = (camW - cropW) / 2;
-          const offsetY = (camH - cropH) / 2;
-          const videoX = offsetX + (cx / canvasWidth) * cropW;
-          const videoY = offsetY + (cy / canvasHeight) * cropH;
+
+          const [videoX, videoY] = mapCanvasToVideo(cx, cy, camW, camH);
           const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
           const py = Math.floor(sketch.constrain(videoY, 0, camH - 1));
           const idx = (px + py * camW) * 4;
@@ -90,7 +93,6 @@ export const handler = ({ inputs, mechanic, sketch }) => {
           const brightness = (r + g + b) / 3;
 
           if (Math.abs(brightness - bgBrightness) > threshold) {
-            // Muestra letra y color según brillo real
             let letterIndex;
             if (brightness < 43) {
               letterIndex = 0; // x
@@ -108,7 +110,6 @@ export const handler = ({ inputs, mechanic, sketch }) => {
             sketch.fill(...asciiColors[letterIndex], 235);
             sketch.text(asciiLetters[letterIndex], cx, cy);
           } else {
-            // Fondo: sólo punto gris
             sketch.fill(110, 110, 110, 90);
             sketch.text(".", cx, cy);
           }

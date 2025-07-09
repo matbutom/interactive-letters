@@ -25,39 +25,37 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     });
   };
 
+  // FUNCION DE MAPEADO ROTADO Y CROP TO FILL - ROTACION 90° A LA IZQUIERDA
+function mapCanvasToVideo(cx, cy, camW, camH) {
+  const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
+  const cropW = canvasHeight / scale;
+  const cropH = canvasWidth / scale;
+  const offsetX = (camW - cropW) / 2;
+  const offsetY = (camH - cropH) / 2;
+
+  // 90° izquierda
+  const videoX = offsetX + (cy / canvasHeight) * cropW;
+  const videoY = offsetY + ((canvasWidth - cx) / canvasWidth) * cropH;
+
+  return [videoX, videoY];
+}
   sketch.draw = () => {
     sketch.background(0);
 
     if (video && video.width > 0) {
       video.loadPixels();
 
-      // Dimensiones reales del video
       const camW = video.width;
       const camH = video.height;
 
-      // Calcula la escala para crop to fill (sin rotación)
-      const scale = Math.max(canvasWidth / camW, canvasHeight / camH);
-
-      // Tamaño del área del video que se usará para cubrir el canvas
-      const cropW = canvasWidth / scale;
-      const cropH = canvasHeight / scale;
-
-      // Offset para centrar la imagen recortada
-      const offsetX = (camW - cropW) / 2;
-      const offsetY = (camH - cropH) / 2;
-
-      // Ahora, recorre TODO el canvas (no solo el área del video)
       for (let y = 0; y < canvasHeight; y += gridSize) {
         for (let x = 0; x < canvasWidth; x += gridSize) {
           // Centro de la celda en canvas
           const cx = x + gridSize / 2;
           const cy = y + gridSize / 2;
 
-          // Mapear cx/cy al espacio del video recortado (corregido: sin rotación)
-          // cx → horizontal en video (camW)
-          // cy → vertical en video (camH)
-          const videoX = offsetX + (cx / canvasWidth) * cropW;
-          const videoY = offsetY + (cy / canvasHeight) * cropH;
+          // Mapear cx/cy al espacio del video recortado y rotado 90° a la izquierda
+          const [videoX, videoY] = mapCanvasToVideo(cx, cy, camW, camH);
 
           // Redondea y limita para no salirte del video
           const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
