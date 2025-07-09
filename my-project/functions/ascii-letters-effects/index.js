@@ -45,12 +45,12 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
         const camW = video.width;
         const camH = video.height;
-        const scale = Math.max(canvasHeight / camW, canvasWidth / camH);
-        const cropW = canvasWidth / scale;    // Corregido: canvasWidth
-        const cropH = canvasHeight / scale;   // Corregido: canvasHeight
+        // CAMBIO: Forzar que el video ocupe el 100% del alto del canvas
+        const scale = canvasHeight / camH;
+        const cropW = canvasWidth / scale;
+        const cropH = canvasHeight / scale;
         const offsetX = (camW - cropW) / 2;
         const offsetY = (camH - cropH) / 2;
-        // Mapeo corregido: cx con canvasWidth, cy con canvasHeight
         const videoX = offsetX + (cx / canvasWidth) * cropW;
         const videoY = offsetY + (cy / canvasHeight) * cropH;
         const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
@@ -73,12 +73,12 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
           const camW = video.width;
           const camH = video.height;
-          const scale = Math.max(canvasHeight / camW, canvasWidth / camH);
-          const cropW = canvasWidth / scale;    // Corregido: canvasWidth
-          const cropH = canvasHeight / scale;   // Corregido: canvasHeight
+          // CAMBIO: Forzar que el video ocupe el 100% del alto del canvas
+          const scale = canvasHeight / camH;
+          const cropW = canvasWidth / scale;
+          const cropH = canvasHeight / scale;
           const offsetX = (camW - cropW) / 2;
           const offsetY = (camH - cropH) / 2;
-          // Mapeo corregido: cx con canvasWidth, cy con canvasHeight
           const videoX = offsetX + (cx / canvasWidth) * cropW;
           const videoY = offsetY + (cy / canvasHeight) * cropH;
           const px = Math.floor(sketch.constrain(videoX, 0, camW - 1));
