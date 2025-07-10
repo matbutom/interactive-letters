@@ -31,16 +31,16 @@ export const handler = ({ inputs, mechanic, sketch }) => {
   };
 
   // FUNCION DE MAPEADO ROTADO Y CROP TO FILL - ROTACION 90° A LA IZQUIERDA
-  function mapCanvasToVideo(cx, cy, camW, camH) {
+function mapCanvasToVideo(cx, cy, camW, camH) {
   const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
   const cropW = canvasHeight / scale;
   const cropH = canvasWidth / scale;
   const offsetX = (camW - cropW) / 2;
   const offsetY = (camH - cropH) / 2;
 
-  // 90° izquierda
-  const videoX = offsetX + (cy / canvasHeight) * cropW;
-  const videoY = offsetY + ((canvasWidth - cx) / canvasWidth) * cropH;
+  // 90° derecha (horario)
+  const videoX = offsetX + ((canvasHeight - cy) / canvasHeight) * cropW;
+  const videoY = offsetY + (cx / canvasWidth) * cropH;
 
   return [videoX, videoY];
 }

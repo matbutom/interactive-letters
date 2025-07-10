@@ -150,7 +150,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     const drawH = camW * scale;
 
     sketch.translate(canvasWidth / 2, canvasHeight / 2);
-    sketch.rotate(sketch.HALF_PI); // 90° a la IZQUIERDA (antihorario)
+    sketch.rotate(-sketch.HALF_PI); // 90° a la IZQUIERDA (antihorario)
     sketch.scale(-1, 1); // reflejo horizontal, sobre el "nuevo" eje X (ya rotado)
     sketch.image(video, 0, 0, 1920, 1080);
 
