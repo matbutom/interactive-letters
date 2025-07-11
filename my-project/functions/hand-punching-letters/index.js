@@ -127,11 +127,28 @@ export const handler = ({ inputs, mechanic, sketch }) => {
     handBodies = [];
 
     hands.forEach(hand => {
-      // Ya no reflejes: el video y el canvas están reflejados juntos
-      const reflectedX = hand.bbox[0] + hand.bbox[2] / 2;
+      const x = hand.bbox[0] + hand.bbox[2] / 2;
       const y = hand.bbox[1] + hand.bbox[3] / 2;
-      const radius = Math.max(hand.bbox[2], hand.bbox[3]) / 2;
-      const handBody = Bodies.circle(reflectedX, y, radius, { isStatic: false, label: 'hand', frictionAir: 0.1 });
+
+      // Ajuste por rotación: video rotado -90°
+      const rotatedX = y;
+      const rotatedY = video.width - x;
+
+      // Escalado para crop-to-fill
+      const scale = Math.max(canvasWidth / video.height, canvasHeight / video.width);
+
+      // Centrado en el canvas
+      const centeredX = canvasWidth / 2 + (rotatedX - video.height / 2) * scale;
+      const centeredY = canvasHeight / 2 + (rotatedY - video.width / 2) * scale;
+
+      const radius = Math.max(hand.bbox[2], hand.bbox[3]) / 2 * scale;
+
+      const handBody = Bodies.circle(centeredX, centeredY, radius, {
+        isStatic: false,
+        label: 'hand',
+        frictionAir: 0.1
+      });
+
       handBodies.push(handBody);
       World.add(world, handBody);
     });
@@ -139,24 +156,17 @@ export const handler = ({ inputs, mechanic, sketch }) => {
 
   sketch.draw = () => {
     sketch.background(0);
-    // --- Fondo de video: crop-to-fill, rotado 90° IZQUIERDA y reflejado ---
+
+    // Dibuja el video rotado 90° a la izquierda
     sketch.push();
     const camW = video.width;
     const camH = video.height;
-
-    // Calcula la escala para crop-to-fill tras rotar 90°
     const scale = Math.max(canvasWidth / camH, canvasHeight / camW);
-    const drawW = camH * scale;
-    const drawH = camW * scale;
-
     sketch.translate(canvasWidth / 2, canvasHeight / 2);
-    sketch.rotate(-sketch.HALF_PI); // 90° a la IZQUIERDA (antihorario)
-    sketch.scale(-1, 1); // reflejo horizontal, sobre el "nuevo" eje X (ya rotado)
+    sketch.rotate(-sketch.HALF_PI);
     sketch.image(video, 0, 0, 1920, 1080);
-
     sketch.pop();
 
-    // --- Lógica Matter.js igual que antes ---
     for (const letraObj of letrasCuerpos) {
       const deltaX = letraObj.cuerpo.position.x - centralPoint.x;
       const deltaY = letraObj.cuerpo.position.y - centralPoint.y;
@@ -165,13 +175,13 @@ export const handler = ({ inputs, mechanic, sketch }) => {
         x: -deltaX * attractionForceMagnitude,
         y: -deltaY * attractionForceMagnitude
       };
-      Matter.Body.applyForce(letraObj.cuerpo, { x: letraObj.cuerpo.position.x, y: letraObj.cuerpo.position.y }, attractionForce);
+      Matter.Body.applyForce(letraObj.cuerpo, letraObj.cuerpo.position, attractionForce);
 
       const orbitalForce = {
         x: -deltaY * orbitalSpeed,
         y: deltaX * orbitalSpeed
       };
-      Matter.Body.applyForce(letraObj.cuerpo, { x: letraObj.cuerpo.position.x, y: letraObj.cuerpo.position.y }, orbitalForce);
+      Matter.Body.applyForce(letraObj.cuerpo, letraObj.cuerpo.position, orbitalForce);
 
       const angleToCenter = sketch.atan2(deltaY, deltaX);
       const tangentialDriftForceAngle = angleToCenter + sketch.HALF_PI * sketch.random([-1, 1]);
@@ -179,7 +189,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
         x: sketch.cos(tangentialDriftForceAngle) * tangentialDriftMagnitude * sketch.random(-1, 1),
         y: sketch.sin(tangentialDriftForceAngle) * tangentialDriftMagnitude * sketch.random(-1, 1)
       };
-      Matter.Body.applyForce(letraObj.cuerpo, { x: letraObj.cuerpo.position.x, y: letraObj.cuerpo.position.y }, tangentialDriftForce);
+      Matter.Body.applyForce(letraObj.cuerpo, letraObj.cuerpo.position, tangentialDriftForce);
     }
 
     if (engine) {
@@ -196,6 +206,7 @@ export const handler = ({ inputs, mechanic, sketch }) => {
       sketch.pop();
     }
 
+    // Dibujo de las manos y cara detectadas
     sketch.fill(255, 0, 0, 50);
     sketch.noStroke();
     handBodies.forEach(body => {
